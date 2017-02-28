@@ -42,7 +42,7 @@ def dir_to_index(index, rootdir, instant_save=False):
 def need_update(index, fname):
 	if not fname.endswith(".pdf"):
 		return False
-	fname = os.path.abspath(fname)
+	fname = os.path.abspath(fname).decode("utf8")
 
 	if not os.path.isfile(fname):
 		return False
