@@ -159,7 +159,8 @@ def search(index, query, path, filenames_only=False):
 		query3 = query3.replace("ä", "\"a")
 
 		# TODO escape query
-		matches = re.findall("^(.*(%s|%s|%s).*)$"%(query,query2,query3), d["txt"], re.IGNORECASE|re.MULTILINE)
+		matches = re.findall("^(.*(%s|%s|%s).*)$"%(query,query2,query3),
+			d["txt"], re.IGNORECASE|re.MULTILINE)
 		if len(matches) == 0:
 			continue
 
@@ -174,8 +175,9 @@ def search(index, query, path, filenames_only=False):
 if __name__ == '__main__':
 	# TODO add option to disable regex
 	parser = argparse.ArgumentParser(description='Indexed search in files.')
-	parser.add_argument('-l', "--files-with-matches", const=True, default=False, dest="filenames_only",
-		action='store_const', help='Only print filenames that contain matches')
+	parser.add_argument('-l', "--files-with-matches", const=True, default=False,
+		dest="filenames_only", action='store_const',
+		help='Only print filenames that contain matches')
 	parser.add_argument('--no-parse', const=False, default=True, dest="parse_files",
 		action='store_const', help='Query only index, don\'t indize any file')
 	parser.add_argument('query', help='The string to search for')
