@@ -12,7 +12,7 @@ import textract
 INDEX_PATH = os.path.expanduser("~/.pdfindex")
 
 # Parse a pdf file and returns containing text.
-def get_text_from_pdf(fname):
+def pdf_to_text(fname):
 	# TODO faster alternative?
 	return textract.process(fname)
 	# return subprocess.check_output(['ps2ascii', fname])
@@ -79,7 +79,7 @@ def add_file_to_index(index, fname):
 	else:
 		index[fname] = {}
 
-	index[fname]["txt"] = get_text_from_pdf(fname)
+	index[fname]["txt"] = pdf_to_text(fname)
 	index[fname]["modified"] = os.path.getmtime(fname)
 
 # saves the index to file
