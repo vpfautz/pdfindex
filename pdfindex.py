@@ -7,15 +7,35 @@ import argparse
 import json
 import re
 import textract
+import hashlib
+import sys
 
 
 INDEX_PATH = os.path.expanduser("~/.pdfindex")
 
+"""
+Index is zlib of json:
+hash is sha256
+
+files[filename]:
+	hash
+	modified: modified time
+hashs[hash]:
+	txt from pdf file
+"""
+
 # Parse a pdf file and returns containing text.
 def pdf_to_text(fname):
 	# TODO faster alternative?
-	return textract.process(fname)
+	t = textract.process(fname)
+	for c,u in zip("aouAOU", ["ä","ö","ü","Ä","Ö","Ü"]):
+		t = t.replace("%s\xcc\x88" % c, u)
+	return t
 	# return subprocess.check_output(['ps2ascii', fname])
+
+def hash_file(fname):
+	d = open(fname, "rb").read()
+	return hashlib.sha256(d).hexdigest()
 
 # Recurse given rootdir and adds new files to index.
 def dir_to_index(index, rootdir, instant_save=False):
@@ -31,7 +51,7 @@ def dir_to_index(index, rootdir, instant_save=False):
 				file_list.append(fname)
 
 	for i,fname in enumerate(file_list):
-		print "[%s/%s] %s" % (i+1, len(file_list), fname)
+		print >> sys.stderr, "[%s/%s] %s" % (i+1, len(file_list), os.path.relpath(fname,rootdir))
 		add_file_to_index(index, fname)
 
 		if instant_save:
@@ -49,15 +69,13 @@ def need_update(index, fname):
 	if not os.path.isfile(fname):
 		return False
 
-	if fname in index:
-		# TODO check with sha256
-		if os.path.getmtime(fname) != index[fname]["modified"]:
-			print "modified: %s" % fname
-			return True
-		else:
-			return False
-	else:
+	if not fname in index["files"]:
 		return True
+
+	if os.path.getmtime(fname) != index["files"][fname]["modified"]:
+		return True
+
+	return False
 
 # Checks if the given file (fname) needs to be updated in the index
 # and, if needed, do this.
@@ -67,20 +85,29 @@ def add_file_to_index(index, fname):
 	fname = os.path.abspath(fname)
 
 	if not os.path.isfile(fname):
-		if fname in index:
-			del index[fname]
+		if fname in index["files"]:
+			del index["files"][fname]
 		return
 
-	if fname in index:
-		if os.path.getmtime(fname) != index[fname]["modified"]:
-			print "modified: %s" % fname
-		else:
+	if fname in index["files"]:
+		if os.path.getmtime(fname) == index["files"][fname]["modified"]:
 			return
-	else:
-		index[fname] = {}
 
-	index[fname]["txt"] = pdf_to_text(fname)
-	index[fname]["modified"] = os.path.getmtime(fname)
+		h = hash_file(fname)
+
+		index["files"][fname]["modified"] = os.path.getmtime(fname)
+		if index["files"][fname]["hash"] != h:
+			index["files"][fname]["hash"] = h
+			index["hashs"][h] = pdf_to_text(fname)
+
+	else:
+		h = hash_file(fname)
+		index["files"][fname] = {}
+		index["files"][fname]["hash"] = h
+		index["files"][fname]["modified"] = os.path.getmtime(fname)
+		if not h in index["hashs"]:
+			index["hashs"][h] = pdf_to_text(fname)
+
 
 # saves the index to file
 def save_index(fname, index):
@@ -91,12 +118,12 @@ def save_index(fname, index):
 # loads the index from given file
 def load_index(fname, parse_files=False):
 	if not os.path.isfile(fname):
-		return {}
+		return {"files": {}, "hashs": {}}
 
 	d = open(fname, "rb").read()
 	index = json.loads(zlib.decompress(d))
 	if parse_files:
-		for fname in index.keys():
+		for fname in index["files"].keys():
 			add_file_to_index(index, fname)
 
 	return index
@@ -132,7 +159,7 @@ def highlight(s, pattern, c=Color.YELLOW2):
 
 def highlight_match(match):
 	txt, pattern = match
-	d = highlight(txt.encode("utf8"), pattern.encode("utf8"))
+	d = highlight(txt, pattern)
 
 	d = d.replace(" \"u", "ü")
 	d = d.replace(" \"o", "ö")
@@ -145,10 +172,14 @@ def highlight_match(match):
 
 # Search query in pdfs located in directory path.
 def search(index, query, path, filenames_only=False):
-	abspath = os.path.abspath(path)
-	for fname, d in index.items():
-		if not fname.startswith(abspath):
+	rootdir = os.path.abspath(path)
+	for fname, file in index["files"].items():
+		if not fname.startswith(rootdir):
 			continue
+
+		txt = index["hashs"][file["hash"]]
+		if isinstance(txt, unicode):
+			txt = txt.encode("utf8")
 
 		query2 = query.replace("ü", " \"u")
 		query2 = query2.replace("ö", " \"o")
@@ -159,16 +190,19 @@ def search(index, query, path, filenames_only=False):
 		query3 = query3.replace("ä", "\"a")
 
 		# TODO escape query
-		matches = re.findall("^(.*(%s|%s|%s).*)$"%(query,query2,query3),
-			d["txt"], re.IGNORECASE|re.MULTILINE)
+		matches = re.findall("^(.*(%s|%s|%s).*)$" % (query, query2, query3),
+		    txt, re.IGNORECASE | re.MULTILINE)
 		if len(matches) == 0:
 			continue
 
 		if filenames_only:
-			print fname
+			if rootdir == fname:
+				print path
+			else:
+				print os.path.relpath(fname, rootdir)
 		else:
 			print ""
-			print clr(fname, Color.WHITE)
+			print clr(os.path.relpath(fname, rootdir), Color.WHITE)
 			print "\n".join(map(highlight_match, matches))
 
 
@@ -191,7 +225,14 @@ if __name__ == '__main__':
 	# TODO do this threaded
 	index = load_index(INDEX_PATH, args.parse_files)
 	if args.parse_files:
-		dir_to_index(index, path, True)
-		save_index(INDEX_PATH, index)
+		if os.path.isdir(path):
+			try:
+				dir_to_index(index, path, True)
+				save_index(INDEX_PATH, index)
+			except KeyboardInterrupt:
+				exit()
+		elif os.path.isfile(path):
+			add_file_to_index(index, path)
+			save_index(INDEX_PATH, index) # TODO
 
 	search(index, query, path, args.filenames_only)
