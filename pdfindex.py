@@ -48,6 +48,7 @@ def need_update(index, fname):
 		return False
 
 	if fname in index:
+		# TODO check with sha256
 		if os.path.getmtime(fname) != index[fname]["modified"]:
 			print "modified: %s" % fname
 			return True
