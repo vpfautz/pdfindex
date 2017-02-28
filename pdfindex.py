@@ -208,6 +208,8 @@ def search(index, query, path, filenames_only=False):
 
 if __name__ == '__main__':
 	# TODO add option to disable regex
+	# TODO add list cache
+	# TODO add clear cache
 	parser = argparse.ArgumentParser(description='Indexed search in files.')
 	parser.add_argument('-l', "--files-with-matches", const=True, default=False,
 		dest="filenames_only", action='store_const',
@@ -221,6 +223,7 @@ if __name__ == '__main__':
 
 	query = args.query
 	path = os.getcwd() if args.directory is None else args.directory
+	# TODO check if path exists
 
 	# TODO do this threaded
 	index = load_index(INDEX_PATH, args.parse_files)
