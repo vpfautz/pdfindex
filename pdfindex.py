@@ -6,6 +6,7 @@ import zlib
 import argparse
 import json
 import re
+import textract
 
 
 INDEX_PATH = os.path.expanduser("~/.pdfindex")
@@ -13,7 +14,8 @@ INDEX_PATH = os.path.expanduser("~/.pdfindex")
 # Parse a pdf file and returns containing text.
 def get_text_from_pdf(fname):
 	# TODO faster alternative?
-	return subprocess.check_output(['ps2ascii', fname])
+	return textract.process(fname)
+	# return subprocess.check_output(['ps2ascii', fname])
 
 # Recurse given rootdir and adds new files to index.
 def dir_to_index(index, rootdir, instant_save=False):
