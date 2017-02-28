@@ -18,10 +18,9 @@ def get_text_from_pdf(fname):
 # Recurse given rootdir and adds new files to index.
 def dir_to_index(index, rootdir, instant_save=False):
 	cwd = os.path.abspath(rootdir)
-
 	file_list = []
 
-	for root, subdirs, files in os.walk(rootdir):
+	for root, subdirs, files in os.walk(cwd):
 		for fname in files:
 			if not fname.endswith(".pdf"):
 				continue
@@ -36,6 +35,7 @@ def dir_to_index(index, rootdir, instant_save=False):
 		if instant_save:
 			# TODO make atomic
 			save_index(INDEX_PATH, index)
+
 	return index
 
 # Returns true, iff the file needs to be updated in index.
@@ -139,8 +139,9 @@ def highlight_match(match):
 
 # Search query in pdfs located in directory path.
 def search(index, query, path, filenames_only=False):
+	abspath = os.path.abspath(path)
 	for fname, d in index.items():
-		if not fname.startswith(path):
+		if not fname.startswith(abspath):
 			continue
 
 		query2 = query.replace("ü", " \"u")
