@@ -159,7 +159,7 @@ def search(index, query, path, filenames_only=False):
 		query3 = query3.replace("ä", "\"a")
 
 		# TODO escape query
-		matches = re.findall("(.*(%s|%s|%s).*)"%(query,query2,query3), d["txt"], re.IGNORECASE)
+		matches = re.findall("^(.*(%s|%s|%s).*)$"%(query,query2,query3), d["txt"], re.IGNORECASE|re.MULTILINE)
 		if len(matches) == 0:
 			continue
 
