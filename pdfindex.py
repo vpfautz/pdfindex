@@ -134,6 +134,9 @@ def highlight_match(match):
 	d = d.replace(" \"u", "ü")
 	d = d.replace(" \"o", "ö")
 	d = d.replace(" \"a", "ä")
+	d = d.replace("\"u", "ü")
+	d = d.replace("\"o", "ö")
+	d = d.replace("\"a", "ä")
 
 	return d
 
@@ -148,8 +151,12 @@ def search(index, query, path, filenames_only=False):
 		query2 = query2.replace("ö", " \"o")
 		query2 = query2.replace("ä", " \"a")
 
+		query3 = query.replace("ü", "\"u")
+		query3 = query3.replace("ö", "\"o")
+		query3 = query3.replace("ä", "\"a")
+
 		# TODO escape query
-		matches = re.findall("(.*(%s|%s).*)"%(query,query2), d["txt"], re.IGNORECASE)
+		matches = re.findall("(.*(%s|%s|%s).*)"%(query,query2,query3), d["txt"], re.IGNORECASE)
 		if len(matches) == 0:
 			continue
 
