@@ -1,6 +1,6 @@
 # pdfindex
 
-Builds a compressed and naiv index over given pdfs and search in them.
+Builds a compressed and naive index over given pdfs and searches in them.
 
 ## Requirements
 
