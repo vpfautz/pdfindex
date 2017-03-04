@@ -226,7 +226,9 @@ if __name__ == '__main__':
 
 	query = args.query
 	path = os.getcwd() if args.directory is None else args.directory
-	# TODO check if path exists
+	if not os.path.exists(path):
+		print "cannot access '%s': No such file or directory" % path
+		exit()
 
 	# TODO do this threaded
 	index = load_index(INDEX_PATH, args.parse_files)
