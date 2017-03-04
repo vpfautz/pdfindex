@@ -52,6 +52,7 @@ def dir_to_index(index, rootdir, instant_save=False):
 				file_list.append(fname)
 
 	last_save = time()
+	# TODO do this threaded?
 	for i,fname in enumerate(file_list):
 		print >> sys.stderr, "[%s/%s] %s" % (i+1, len(file_list), os.path.relpath(fname,rootdir))
 		add_file_to_index(index, fname)
@@ -230,7 +231,6 @@ if __name__ == '__main__':
 		print "cannot access '%s': No such file or directory" % path
 		exit()
 
-	# TODO do this threaded
 	index = load_index(INDEX_PATH, args.parse_files)
 	if args.parse_files:
 		if os.path.isdir(path):
