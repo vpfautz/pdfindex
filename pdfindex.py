@@ -201,12 +201,12 @@ def search(index, query, path, filenames_only=False):
 
 		if filenames_only:
 			if rootdir == fname:
-				print path
+				print path.encode("utf8")
 			else:
-				print os.path.relpath(fname, rootdir)
+				print os.path.relpath(fname, rootdir).encode("utf8")
 		else:
 			print ""
-			print clr(os.path.relpath(fname, rootdir), Color.WHITE)
+			print clr(os.path.relpath(fname, rootdir).encode("utf8"), Color.WHITE)
 			print "\n".join(map(highlight_match, matches))
 
 
