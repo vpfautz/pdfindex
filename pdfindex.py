@@ -212,8 +212,6 @@ def search(index, query, path, filenames_only=False):
 
 if __name__ == '__main__':
 	# TODO add option to disable regex
-	# TODO add list cache
-	# TODO add clear cache
 	parser = argparse.ArgumentParser(description='Indexed search in files.')
 	parser.add_argument('-l', "--files-with-matches", const=True, default=False,
 		dest="filenames_only", action='store_const',
@@ -223,7 +221,32 @@ if __name__ == '__main__':
 	parser.add_argument('query', help='The string to search for')
 	parser.add_argument('directory', nargs='?', help='The directory to search in')
 
+	group = parser.add_mutually_exclusive_group()
+	group.add_argument('--cached-files', const=True, default=False,
+		dest="cached_files", action="store_const", help="List all cached files")
+	group.add_argument('--cached-hashs', const=True, default=False,
+		dest="cached_hashs", action="store_const", help="List all cached hashs")
+
+	parser.add_argument('--clear-cache', const=True, default=False, dest="clear_cache",
+		action='store_const', help='Clear cache')
+
 	args = parser.parse_args()
+
+	if args.clear_cache:
+		os.remove(INDEX_PATH)
+		exit()
+
+	if args.cached_files:
+		index = load_index(INDEX_PATH)
+		for f in index["files"]:
+			print f.encode("utf8")
+		exit()
+
+	if args.cached_hashs:
+		index = load_index(INDEX_PATH)
+		for h in index["hashs"]:
+			print h
+		exit()
 
 	query = args.query
 	path = os.getcwd() if args.directory is None else args.directory
