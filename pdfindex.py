@@ -9,6 +9,7 @@ import re
 import textract
 import hashlib
 import sys
+from time import time
 
 
 INDEX_PATH = os.path.expanduser("~/.pdfindex")
@@ -50,13 +51,15 @@ def dir_to_index(index, rootdir, instant_save=False):
 			if need_update(index, fname):
 				file_list.append(fname)
 
+	last_save = time()
 	for i,fname in enumerate(file_list):
 		print >> sys.stderr, "[%s/%s] %s" % (i+1, len(file_list), os.path.relpath(fname,rootdir))
 		add_file_to_index(index, fname)
 
-		if instant_save:
+		if instant_save and time() > last_save + 10:
 			# TODO make atomic
 			save_index(INDEX_PATH, index)
+			last_save = time()
 
 	return index
 
