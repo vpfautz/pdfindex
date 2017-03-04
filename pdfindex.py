@@ -241,6 +241,6 @@ if __name__ == '__main__':
 				exit()
 		elif os.path.isfile(path):
 			add_file_to_index(index, path)
-			save_index(INDEX_PATH, index) # TODO
+			save_index(INDEX_PATH, index)
 
 	search(index, query, path, args.filenames_only)
