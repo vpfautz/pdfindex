@@ -58,7 +58,6 @@ def dir_to_index(index, rootdir, instant_save=False):
 		add_file_to_index(index, fname)
 
 		if instant_save and time() > last_save + 10:
-			# TODO make atomic
 			save_index(INDEX_PATH, index)
 			last_save = time()
 
@@ -115,17 +114,24 @@ def add_file_to_index(index, fname):
 
 # saves the index to file
 def save_index(fname, index):
-	# TODO atomic/backup?
+	if index == orig_data:
+		return
 	d = zlib.compress(json.dumps(index))
+	if os.path.exists(fname):
+		os.rename(fname, "%s_bak" % fname)
 	open(fname, "wb").write(d)
+
+orig_data = None
 
 # loads the index from given file
 def load_index(fname, parse_files=False):
+	global orig_data
 	if not os.path.isfile(fname):
 		return {"files": {}, "hashs": {}}
 
 	d = open(fname, "rb").read()
 	index = json.loads(zlib.decompress(d))
+	orig_data = index
 	if parse_files:
 		for fname in index["files"].keys():
 			add_file_to_index(index, fname)
