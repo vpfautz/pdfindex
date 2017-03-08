@@ -185,6 +185,11 @@ def search(index, query, path, filenames_only=False):
 		if not fname.startswith(rootdir):
 			continue
 
+		if file["hash"] not in index["hashs"]:
+			print "\nERROR Index file corrupt! (missing hash)"
+			print fname
+			print file
+			exit(1)
 		txt = index["hashs"][file["hash"]]
 		if isinstance(txt, unicode):
 			txt = txt.encode("utf8")
