@@ -10,6 +10,7 @@ import textract
 import hashlib
 import sys
 from time import time
+from copy import deepcopy
 
 
 INDEX_PATH = os.path.expanduser("~/.pdfindex")
@@ -131,7 +132,7 @@ def load_index(fname, parse_files=False):
 
 	d = open(fname, "rb").read()
 	index = json.loads(zlib.decompress(d))
-	orig_data = index
+	orig_data = deepcopy(index)
 	if parse_files:
 		for fname in index["files"].keys():
 			add_file_to_index(index, fname)
