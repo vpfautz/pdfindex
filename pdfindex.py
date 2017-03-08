@@ -93,24 +93,21 @@ def add_file_to_index(index, fname):
 			del index["files"][fname]
 		return
 
-	if fname in index["files"]:
-		if os.path.getmtime(fname) == index["files"][fname]["modified"]:
-			return
+	if fname in index["files"] \
+	    and os.path.getmtime(fname) == index["files"][fname]["modified"]\
+	    and index["files"][fname]["hash"] in index["hashs"]:
+		return
 
-		h = hash_file(fname)
+	h = hash_file(fname)
+	modified = os.path.getmtime(fname)
 
-		index["files"][fname]["modified"] = os.path.getmtime(fname)
-		if index["files"][fname]["hash"] != h:
-			index["files"][fname]["hash"] = h
-			index["hashs"][h] = pdf_to_text(fname)
+	if not h in index["hashs"]:
+		index["hashs"][h] = pdf_to_text(fname)
 
-	else:
-		h = hash_file(fname)
-		index["files"][fname] = {}
-		index["files"][fname]["hash"] = h
-		index["files"][fname]["modified"] = os.path.getmtime(fname)
-		if not h in index["hashs"]:
-			index["hashs"][h] = pdf_to_text(fname)
+	index["files"][fname] = {
+		"hash": h,
+		"modified": modified
+	}
 
 
 # saves the index to file
@@ -268,6 +265,7 @@ if __name__ == '__main__':
 				dir_to_index(index, path, True)
 				save_index(INDEX_PATH, index)
 			except KeyboardInterrupt:
+				save_index(INDEX_PATH, index)
 				exit()
 		elif os.path.isfile(path):
 			add_file_to_index(index, path)
