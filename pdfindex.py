@@ -241,7 +241,7 @@ if __name__ == '__main__':
 		help='Only print filenames that contain matches')
 	parser.add_argument('--no-parse', const=False, default=True, dest="parse_files",
 		action='store_const', help='Query only index, don\'t indize any file')
-	parser.add_argument('query', help='The string to search for')
+	parser.add_argument('query', nargs="?", default=None, help='The string to search for')
 	parser.add_argument('directory', nargs='?', help='The directory to search in')
 
 	group = parser.add_mutually_exclusive_group()
@@ -270,6 +270,11 @@ if __name__ == '__main__':
 		for h in index["hashs"]:
 			print h
 		exit()
+
+	if args.query is None:
+		parser.print_usage()
+		print "%s: error: too few arguments" % os.path.split(sys.argv[0])[1]
+		exit(2)
 
 	query = args.query
 	path = os.getcwd() if args.directory is None else args.directory
