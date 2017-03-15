@@ -183,6 +183,14 @@ def highlight_match(match):
 
 	return d
 
+# Iff txt is a unicode, it will encode it as UTF8.
+def enc(txt):
+	if isinstance(txt, unicode):
+		return txt.encode("utf8")
+	else:
+		return txt
+
+
 # Search query in pdfs located in directory path.
 def search(index, query, path, filenames_only=False):
 	rootdir = os.path.abspath(path)
@@ -196,8 +204,7 @@ def search(index, query, path, filenames_only=False):
 			print file
 			exit(1)
 		txt = index["hashs"][file["hash"]]
-		if isinstance(txt, unicode):
-			txt = txt.encode("utf8")
+		txt = enc(txt)
 
 		query2 = query.replace("ü", " \"u")
 		query2 = query2.replace("ö", " \"o")
@@ -217,10 +224,10 @@ def search(index, query, path, filenames_only=False):
 			if rootdir == fname:
 				print path.encode("utf8")
 			else:
-				print os.path.relpath(fname, rootdir).encode("utf8")
+				print enc(os.path.relpath(fname, rootdir))
 		else:
 			print ""
-			print clr(os.path.relpath(fname, rootdir).encode("utf8"), Color.WHITE)
+			print clr(enc(os.path.relpath(fname, rootdir)), Color.WHITE)
 			print "\n".join(map(highlight_match, matches))
 
 
