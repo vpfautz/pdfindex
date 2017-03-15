@@ -32,6 +32,8 @@ def pdf_to_text(fname):
 	t = textract.process(fname)
 	for c,u in zip("aouAOU", ["ä","ö","ü","Ä","Ö","Ü"]):
 		t = t.replace("%s\xcc\x88" % c, u)
+		t = t.replace("%sĚ" % c, u)
+	t = t.replace("Ă", "ß")
 	return t
 
 def hash_file(fname):
