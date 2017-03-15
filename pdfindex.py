@@ -33,7 +33,6 @@ def pdf_to_text(fname):
 	for c,u in zip("aouAOU", ["ä","ö","ü","Ä","Ö","Ü"]):
 		t = t.replace("%s\xcc\x88" % c, u)
 	return t
-	# return subprocess.check_output(['ps2ascii', fname])
 
 def hash_file(fname):
 	d = open(fname, "rb").read()
