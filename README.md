@@ -13,11 +13,11 @@ If you ever move or copy some pdf file, this tool compares the sha256 of the fil
 In german texts there are often umlauts, which we try to fix by using some simple replacements.
 
 A quick comparison between pdfgrep and pdfindex:
-|                  |           pdfgrep                      | pdfindex                          |
-|------------------|----------------------------------------|-----------------------------------|
-|index format      |multiple files named by sha1 of the file| one file                          |
-|file recognition  | sha1                                   |filename, modification time, sha256|
-|index compression | No                                     | Yes, zlib                         |
+| | pdfgrep | pdfindex |
+| --- | --- | --- |
+|index format | multiple files named by sha1 of the file | one file |
+|file recognition | sha1 | filename, modification time, sha256 |
+|index compression | No | Yes, zlib |
 
 ## Requirements
 
