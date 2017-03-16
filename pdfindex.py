@@ -40,7 +40,7 @@ def hash_file(fname):
 	d = open(fname, "rb").read()
 	return hashlib.sha256(d).hexdigest()
 
-def stdout(s):
+def stderr(s):
 	print >> sys.stderr, s
 
 # Recurse given rootdir and adds new files to index.
@@ -59,7 +59,7 @@ def dir_to_index(index, rootdir, instant_save=False):
 	last_save = time()
 	# TODO do this threaded?
 	for i,fname in enumerate(file_list):
-		stdout("[%s/%s] %s" % (i+1, len(file_list), os.path.relpath(fname,rootdir)))
+		# stderr("[%s/%s] %s" % (i+1, len(file_list), os.path.relpath(fname,rootdir)))
 		add_file_to_index(index, fname)
 
 		if instant_save and time() > last_save + 10:
@@ -117,14 +117,14 @@ def add_file_to_index(index, fname):
 # saves the index to file
 def save_index(fname, index):
 	if index == orig_data:
-		# stdout("index already up-to-date :)")
+		# stderr("index already up-to-date :)")
 		return
 
 	d = zlib.compress(json.dumps(index))
 	if os.path.exists(fname):
 		os.rename(fname, "%s_bak" % fname)
 	open(fname, "wb").write(d)
-	stdout("index file saved")
+	# stderr("index file saved")
 
 orig_data = None
 
