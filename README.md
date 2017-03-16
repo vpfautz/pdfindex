@@ -20,12 +20,10 @@ A quick comparison between pdfgrep and pdfindex:
 |file recognition | sha1 | filename, modification time, sha256
 |index compression | No | Yes, zlib
 
+
 ## Requirements
 
-To parse the pdf files we use `textract`.
-```
-pip2 install textract
-```
+To parse the pdf files we use `pdftotext`, it's part of the poppler package.
 The tool is written in Python2.7, so `pyhton2` have to be installed as well.
 
 

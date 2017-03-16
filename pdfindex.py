@@ -6,7 +6,7 @@ import zlib
 import argparse
 import json
 import re
-import textract
+# import textract
 import hashlib
 import sys
 from time import time
@@ -28,8 +28,11 @@ hashs[hash]:
 
 # Parse a pdf file and returns containing text.
 def pdf_to_text(fname):
+	# t = textract.process(fname)
 	# TODO faster alternative?
-	t = textract.process(fname)
+	r = subprocess.Popen(["pdftotext", fname, "-"], stdout=subprocess.PIPE)
+	t = r.communicate()[0]
+
 	for c,u in zip("aouAOU", ["ä","ö","ü","Ä","Ö","Ü"]):
 		t = t.replace("%s\xcc\x88" % c, u)
 		t = t.replace("%sĚ" % c, u)
